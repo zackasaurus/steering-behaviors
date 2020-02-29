@@ -1,0 +1,8 @@
+{
+  "name": "steering-behaviors",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Zackasaurus/steering-behaviors.git",
+  "author": "zach <zachbogard@gmail.com>",
+  "license": "MIT"
+}
