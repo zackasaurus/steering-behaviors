@@ -1,32 +1,36 @@
-import { normalize, multiply, length } from './Vector2d';
-
+import Vector2d from './Vector2d';
 class Element {
-    constructor(game) {
-        this.game = game;
+    constructor(world) {
+        this.world = world;
+        this.game = this.world.game;
         this.ctx = this.game.ctx;
+        this.id = this.world.elements.current.id;
         this.max = {
+            separation: {
+                radius: 40,
+            },
+            neighbor: {
+                radius: 100,
+            },
             approach: {
                 radius: 100,
             },
             speed: 4,
             force: 0.1,
         };
+        this.pos = new Vector2d(
+            Math.random() * this.ctx.canvas.width,
+            Math.random() * this.ctx.canvas.height
+        );
+        this.vel = new Vector2d();
+        this.acc = new Vector2d();
 
-        this.pos = {
-            x: 50,
-            y: 50,
-        };
-        this.vel = {
-            x: 0,
-            y: 0,
-        };
-        this.acc = {
-            x: 0,
-            y: 0,
-        };
         this.desired = {
             x: null,
             y: null,
+        };
+        this.weights = {
+            approach: 1,
         };
         this.size = 15;
         this.lineSize = 15;
@@ -51,64 +55,80 @@ class Element {
         );
         this.ctx.stroke();
     }
-    seek() {
-        this.desired.x = this.game.target.x - this.pos.x;
-        this.desired.y = this.game.target.y - this.pos.y;
+    seek(weight) {
+        const desired = new Vector2d();
+        desired.add(this.game.target);
+        desired.subtract(this.pos);
 
-        this.desired = normalize(this.desired, this.max.speed);
-        let steer = {
-            x: this.desired.x - this.vel.x,
-            y: this.desired.y - this.vel.y,
-        };
-        if (length(steer) > this.max.force) {
-            steer = normalize(steer, this.max.force);
+        desired.normalize(this.max.speed);
+        // Steer force
+        const steer = new Vector2d();
+        steer.add(desired);
+        steer.subtract(this.vel);
+
+        if (steer.length() > this.max.force) {
+            steer.normalize(this.max.force);
         }
+        steer.multiply(weight);
         return steer;
     }
-    approach() {
-        this.desired.x = this.game.target.x - this.pos.x;
-        this.desired.y = this.game.target.y - this.pos.y;
+    approach(weight) {
+        // Set desired
+        const desired = new Vector2d();
+        desired.add(this.game.target);
+        desired.subtract(this.pos);
 
-        let distance = length(this.desired);
+        // Get distance
+        const distance = desired.length();
 
-        this.desired = normalize(this.desired, 1);
+        desired.normalize();
+
         // Approach radius
         if (distance < this.max.approach.radius) {
-            this.desired = multiply(
-                this.desired,
+            desired.multiply(
                 (distance / this.max.approach.radius) * this.max.speed
             );
         } else {
-            this.desired = multiply(this.desired, this.max.speed);
+            desired.multiply(this.max.speed);
         }
+        // Steer force
+        const steer = new Vector2d();
+        steer.add(desired);
+        steer.subtract(this.vel);
 
-        let steer = {
-            x: this.desired.x - this.vel.x,
-            y: this.desired.y - this.vel.y,
-        };
-        if (length(steer) > this.max.force) {
-            steer = normalize(steer, this.max.force);
+        if (steer.length() > this.max.force) {
+            steer.normalize(this.max.force);
         }
+        steer.multiply(weight);
         return steer;
     }
+    separate() {
+        const sum = new Vector2d();
+        let count = 0;
+        // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
+        // Object.keys(this.world.elements.data).forEach(item => {
+        //     let distance =
+        // })
+    }
+    applyForce(force) {
+        this.acc.add(force);
+    }
     update() {
-        // Acceleration
-        this.acc = this.approach();
+        // Reset acceleration
+        this.acc.multiply(0);
 
-        // Velocity
-        this.vel.x += this.acc.x;
-        this.vel.y += this.acc.y;
+        // Apply forces
+        this.applyForce(this.approach(this.weights.approach));
 
-        if (length(this.vel) > this.max.speed) {
-            this.vel = normalize(this.vel, this.max.speed);
+        // Set Velocity
+        this.vel.add(this.acc);
+
+        // Normalize Velocity
+        if (this.vel.length() > this.max.speed) {
+            this.vel.normalize(this.max.speed);
         }
-
-        // Position
-        this.pos.x += this.vel.x;
-        this.pos.y += this.vel.y;
-
-        // Boundaries
-        this.pos.x > this.ctx.canvas.width ? this.ctx.canvas.width : this.pos.x;
+        // Set Position
+        this.pos.add(this.vel);
     }
 }
 
