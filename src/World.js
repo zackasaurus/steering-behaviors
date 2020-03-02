@@ -7,12 +7,15 @@ class World {
             current: {
                 id: 0,
             },
-            total: 5,
+            total: 200,
             data: {},
         };
 
         for (let i = 0; i < this.elements.total; i++) {
-            this.elements.data[this.elements.current.id++] = new Element(this);
+            this.elements.data[this.elements.current.id] = new Element(
+                this,
+                this.elements.current.id++
+            );
         }
     }
     draw() {

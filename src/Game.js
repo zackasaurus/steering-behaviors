@@ -4,8 +4,8 @@ class Game {
     constructor() {
         this.canvas = document.querySelector('#canvas');
         this.ctx = canvas.getContext('2d');
-        this.ctx.canvas.width = window.innerWidth / 2;
-        this.ctx.canvas.height = window.innerHeight / 2;
+        this.ctx.canvas.width = window.innerWidth;
+        this.ctx.canvas.height = window.innerHeight;
 
         this.target = new Vector2d(
             this.ctx.canvas.width / 2,
@@ -28,6 +28,8 @@ class Game {
                 y: e.clientY - this.ctx.canvas.offsetTop,
             };
         });
+
+        // Resize window
 
         // Time WIP
         // this.timestamp.current = Date.now();

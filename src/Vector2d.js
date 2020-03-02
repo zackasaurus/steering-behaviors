@@ -4,7 +4,12 @@ class Vector2d {
         this.y = y;
     }
     length() {
-        return (Math.abs(this.x) ** 2 + Math.abs(this.y) ** 2) ** 0.5;
+        return Math.sqrt(Math.abs(this.x) ** 2 + Math.abs(this.y) ** 2);
+    }
+    distance(vector) {
+        return Math.sqrt(
+            Math.abs(this.x - vector.x) ** 2 + Math.abs(this.y - vector.y) ** 2
+        );
     }
     normalize(scalar = 1) {
         const length = this.length();
@@ -23,5 +28,16 @@ class Vector2d {
         this.x *= scalar;
         this.y *= scalar;
     }
+    divide(scalar) {
+        this.x /= scalar;
+        this.y /= scalar;
+    }
+    limit(force) {
+        if (this.length() > force) {
+            this.normalize(force);
+        }
+    }
 }
+
+// export const distance = () => {};
 export default Vector2d;
