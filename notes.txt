@@ -1,0 +1,7 @@
+Alignment is average vel of all neighbors
+
+Flocking Behavior
+    Seperation
+    Alignment
+    Cohesion
+

@@ -7,7 +7,7 @@ class World {
             current: {
                 id: 0,
             },
-            total: 200,
+            total: this.game.config.elements.total,
             data: {},
         };
 

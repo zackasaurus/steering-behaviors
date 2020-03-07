@@ -25,8 +25,9 @@ class Element {
                 radius: 300,
             },
 
-            speed: 4,
-            force: 0.1,
+            speed: 5,
+            force: 0.075,
+            rotation: 0.05, // radians
         };
 
         this.inside = 0;
@@ -36,30 +37,44 @@ class Element {
             Math.random() * this.ctx.canvas.width,
             Math.random() * this.ctx.canvas.height
         );
-        this.vel = new Vector2d();
+        this.vel = new Vector2d(-0.1, 0);
         this.acc = new Vector2d();
+
+        // Orientation
+        this.orientation = new Vector2d(-1, 0);
 
         // Weights
         this.weights = {
             approach: 1,
-            separate: 5,
+            separate: 3,
         };
+
         // Draw
         this.size = 15;
         this.lineSize = 15;
     }
     draw() {
+        // Turret
+        this.ctx.save();
         this.ctx.beginPath();
-        this.ctx.rect(
-            this.pos.x - this.size / 2,
-            this.pos.y - this.size / 2,
-            this.size,
-            this.size
-        );
-        this.ctx.fillStyle = 'red';
+
+        this.ctx.translate(this.pos.x, this.pos.y);
+        this.ctx.rotate(-this.vel.angle());
+
+        this.ctx.arc(this.size / 2, 0, this.size / 4, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'blue';
+        this.ctx.fill();
+        this.ctx.closePath();
+        this.ctx.restore();
+
+        // Base
+        this.ctx.beginPath();
+        this.ctx.arc(this.pos.x, this.pos.y, this.size / 2, 0, 2 * Math.PI);
+        this.ctx.fillStyle = 'orangered';
         this.ctx.fill();
         this.ctx.closePath();
 
+        // Line
         // this.ctx.beginPath();
         // this.ctx.moveTo(this.pos.x, this.pos.y);
         // this.ctx.lineTo(
@@ -70,7 +85,7 @@ class Element {
     }
     seek(weight) {
         const desired = new Vector2d();
-        desired.add(this.game.target);
+        desired.add(this.game.target.pos);
         desired.subtract(this.pos);
 
         desired.normalize(this.max.speed);
@@ -88,7 +103,7 @@ class Element {
     approach(weight = 1) {
         // Set desired
         const desired = new Vector2d();
-        desired.add(this.game.target);
+        desired.add(this.game.target.pos);
         desired.subtract(this.pos);
 
         // Get distance
@@ -100,7 +115,7 @@ class Element {
         // Approach radius
         if (distance < this.max.approach.radius) {
             desired.multiply(
-                (distance / this.max.approach.radius) ** 2 * this.max.speed
+                (distance / this.max.approach.radius) ** 1 * this.max.speed
             );
         } else {
             desired.multiply(this.max.speed);
@@ -134,7 +149,7 @@ class Element {
                 count++;
             }
         });
-        const distance = this.pos.distance(this.game.target);
+        const distance = this.pos.distance(this.game.target.pos);
         if (count > 0) {
             sum.divide(count);
             sum.normalize();
@@ -152,33 +167,33 @@ class Element {
             sum.limit(this.max.force);
         }
 
-        // Set desired
-        // const desired = new Vector2d();
-        // desired.add(this.game.target);
-        // desired.subtract(this.pos);
-
-        // // Get distance
-        // const distance = desired.length();
-
-        // // Normalize desired after getting initial distance
-        // desired.normalize();
-
-        // // Approach radius
-        // if (distance < this.max.approach.radius) {
-        //     desired.multiply(
-        //         (distance / this.max.approach.radius) * this.max.speed
-        //     );
-        // } else {
-        //     desired.multiply(this.max.speed);
-        // }
-        // sum.multiply(this.approach());
-
         sum.multiply(weight);
         return sum;
     }
 
     applyForce(force) {
         this.acc.add(force);
+    }
+    applyVelocity() {
+        const desired = new Vector2d();
+        desired.add(this.vel);
+        desired.add(this.acc);
+        // console.log(this.v);
+        const angle = this.vel.angle(desired); // in radians
+
+        if (Math.abs(angle) > this.max.rotation) {
+            // console.log('gg');
+            // set rotate based off of angle
+            if (angle < 0) {
+                this.vel.rotate(-this.max.rotation);
+            } else {
+                this.vel.rotate(this.max.rotation);
+            }
+
+            this.vel.normalize(desired.length());
+        } else {
+            this.vel.add(this.acc);
+        }
     }
     update() {
         // Reset acceleration
@@ -188,36 +203,10 @@ class Element {
         this.applyForce(this.approach(this.weights.approach));
         this.applyForce(this.separate(this.weights.separate));
 
-        // Entropy ?
-        if (this.entropy) {
-            if (
-                this.pos.distance(this.game.target) < this.max.approach.radius
-            ) {
-                this.inside += 16.6666;
-                this.max.speed =
-                    this.max.total.speed.max *
-                    (1 - this.inside / this.max.approach.decay) ** 1;
-                if (this.max.speed < 0) {
-                    this.max.speed = 0;
-                }
-                if (this.max.speed < this.max.total.speed.max) {
-                    this.max.speed += this.max.total.speed.min;
-                }
-            } else {
-                this.inside = 0;
-                this.max.speed = 4;
-            }
-        }
-
-        // this.separate();
-
         // Set Velocity
-        this.vel.add(this.acc);
+        this.applyVelocity();
+        // this.vel.add(this.acc);
 
-        // Normalize Velocity
-        if (this.vel.length() > this.max.speed) {
-            this.vel.normalize(this.max.speed);
-        }
         // Set Position
         this.pos.add(this.vel);
     }

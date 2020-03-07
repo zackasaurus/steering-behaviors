@@ -11,6 +11,24 @@ class Vector2d {
             Math.abs(this.x - vector.x) ** 2 + Math.abs(this.y - vector.y) ** 2
         );
     }
+    dot(vector) {
+        return this.x * vector.x + this.y * vector.y;
+    }
+    cross(vector) {
+        return this.x * vector.y - this.y * vector.x;
+    }
+    angle(vector = { x: 1, y: 0 }) {
+        const cross = this.cross(vector);
+        const angle = Math.atan2(Math.abs(cross), this.dot(vector));
+        if (cross < 0) {
+            return -angle;
+        }
+        return angle;
+    }
+    rotate(theta) {
+        this.x = Math.cos(theta) * this.x - Math.sin(theta) * this.y;
+        this.y = Math.sin(theta) * this.x + Math.cos(theta) * this.y;
+    }
     normalize(scalar = 1) {
         const length = this.length();
         this.x = (this.x * scalar) / length;
@@ -39,5 +57,4 @@ class Vector2d {
     }
 }
 
-// export const distance = () => {};
 export default Vector2d;
