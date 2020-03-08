@@ -5,8 +5,17 @@ class Element {
         this.id = id;
         this.game = this.world.game;
         this.ctx = this.game.ctx;
+
         // Constants
 
+        // Weights
+        this.weights = {
+            approach: 3,
+            separate: 5,
+            alignment: 3,
+            cohesion: 0.5,
+        };
+        // Max
         this.max = {
             total: {
                 speed: {
@@ -14,8 +23,14 @@ class Element {
                     max: 4,
                 },
             },
+            cohesion: {
+                radius: 100,
+            },
+            alignment: {
+                radius: 50,
+            },
             separation: {
-                radius: 25,
+                radius: 20,
             },
             neighbor: {
                 radius: 100,
@@ -26,7 +41,7 @@ class Element {
             },
 
             speed: 5,
-            force: 0.075,
+            force: 0.1,
             rotation: 0.05, // radians
         };
 
@@ -37,20 +52,14 @@ class Element {
             Math.random() * this.ctx.canvas.width,
             Math.random() * this.ctx.canvas.height
         );
-        this.vel = new Vector2d(-0.1, 0);
+        this.vel = new Vector2d(0, 0.1);
         this.acc = new Vector2d();
 
         // Orientation
         this.orientation = new Vector2d(-1, 0);
 
-        // Weights
-        this.weights = {
-            approach: 1,
-            separate: 3,
-        };
-
         // Draw
-        this.size = 15;
+        this.size = 10;
         this.lineSize = 15;
     }
     draw() {
@@ -115,7 +124,7 @@ class Element {
         // Approach radius
         if (distance < this.max.approach.radius) {
             desired.multiply(
-                (distance / this.max.approach.radius) ** 1 * this.max.speed
+                (distance / this.max.approach.radius) ** 2 * this.max.speed
             );
         } else {
             desired.multiply(this.max.speed);
@@ -157,7 +166,7 @@ class Element {
             // Approach added
             if (distance < this.max.approach.radius) {
                 sum.multiply(
-                    (distance / this.max.approach.radius) * this.max.speed
+                    (distance / this.max.approach.radius) ** 2 * this.max.speed
                 );
             } else {
                 sum.multiply(this.max.speed);
@@ -169,6 +178,97 @@ class Element {
 
         sum.multiply(weight);
         return sum;
+    }
+    alignment(weight = 1) {
+        const sum = new Vector2d();
+        let count = 0;
+        // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
+        Object.keys(this.world.elements.data).forEach(item => {
+            const { pos, vel } = this.world.elements.data[item];
+
+            let distance = this.pos.distance(pos);
+
+            if (distance > 0 && distance < this.max.alignment.radius) {
+                sum.add(vel);
+                count++;
+            }
+        });
+        const distance = this.pos.distance(this.game.target.pos);
+        if (count > 0) {
+            sum.divide(count);
+            sum.normalize();
+
+            // Approach added
+            if (distance < this.max.approach.radius) {
+                sum.multiply(
+                    (distance / this.max.approach.radius) * this.max.speed
+                );
+            } else {
+                sum.multiply(this.max.speed);
+            }
+
+            sum.subtract(this.vel);
+            sum.limit(this.max.force);
+        } else {
+            return new Vector2d();
+        }
+
+        sum.multiply(weight);
+        return sum;
+    }
+    cohesion(weight = 1) {
+        const sum = new Vector2d();
+        let count = 0;
+        // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
+        Object.keys(this.world.elements.data).forEach(item => {
+            const { pos } = this.world.elements.data[item];
+
+            let distance = this.pos.distance(pos);
+
+            if (distance > 0 && distance < this.max.cohesion.radius) {
+                sum.add(pos);
+                count++;
+            }
+        });
+        if (count > 0) {
+            sum.divide(count);
+
+            const desired = new Vector2d();
+            desired.add(sum);
+            desired.subtract(this.pos);
+
+            desired.normalize(this.max.speed);
+            // Steer force
+            const steer = new Vector2d();
+            steer.add(desired);
+            steer.subtract(this.vel);
+
+            steer.limit(this.max.force);
+
+            const distance = this.pos.distance(this.game.target.pos);
+
+            // if (steer.length() > this.max.force) {
+            //     steer.normalize(this.max.force);
+            // }
+            steer.multiply(weight);
+            return steer;
+
+            // sum.normalize();
+
+            // Approach added
+            // if (distance < this.max.approach.radius) {
+            //     sum.multiply(
+            //         (distance / this.max.approach.radius) * this.max.speed
+            //     );
+            // } else {
+            //     sum.multiply(this.max.speed);
+            // }
+
+            // sum.subtract(this.vel);
+            // sum.limit(this.max.force);
+        } else {
+            return new Vector2d();
+        }
     }
 
     applyForce(force) {
@@ -202,7 +302,8 @@ class Element {
         // Apply forces
         this.applyForce(this.approach(this.weights.approach));
         this.applyForce(this.separate(this.weights.separate));
-
+        this.applyForce(this.alignment(this.weights.alignment));
+        this.applyForce(this.cohesion(this.weights.cohesion));
         // Set Velocity
         this.applyVelocity();
         // this.vel.add(this.acc);

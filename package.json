@@ -6,6 +6,7 @@
     "author": "zach <zachbogard@gmail.com>",
     "license": "MIT",
     "dependencies": {
+        "simplex-noise": "^2.4.0",
         "webpack": "^4.41.6",
         "webpack-cli": "^3.3.11"
     },

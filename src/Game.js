@@ -10,6 +10,8 @@ class Game {
         this.canvas = document.querySelector('#canvas');
         this.ctx = canvas.getContext('2d');
 
+        this.ctx.imageSmoothingEnabled = false;
+
         this.ctx.canvas.width = this.config.canvas.width;
         this.ctx.canvas.height = this.config.canvas.height;
 
@@ -38,12 +40,20 @@ class Game {
 
         this.world = new World(this);
 
-        // Mouse click
+        // Mouse down
         document.addEventListener('mousedown', e => {
-            this.target.pos = {
-                x: e.clientX - this.ctx.canvas.offsetLeft,
-                y: e.clientY - this.ctx.canvas.offsetTop,
+            const { width, height, offsetLeft, offsetTop } = this.ctx.canvas;
+
+            // Get position
+            const pos = {
+                x: e.clientX - offsetLeft,
+                y: e.clientY - offsetTop,
             };
+
+            // Set Boundaries
+            if (pos.x < width && pos.x >= 0 && pos.y < height && pos.y >= 0) {
+                this.target.pos = pos;
+            }
         });
         // Resize window
         // window.addEventListener('resize', e => {
@@ -67,7 +77,7 @@ class Game {
                 this.ctx.canvas.height
             );
             // Draw
-            // this.grid.draw();
+            this.grid.draw();
             this.target.draw();
             this.world.draw();
             // Tick

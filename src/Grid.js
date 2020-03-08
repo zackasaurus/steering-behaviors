@@ -2,29 +2,36 @@ class Grid {
     constructor(game) {
         this.game = game;
         this.ctx = this.game.ctx;
-        this.x = this.game.config.grid.x;
-        this.y = this.game.config.grid.y;
+        // width = this.game.ctx.canvas.width;
+        // this.rows = this.game.config.grid.rows;
+        // this.cols = this.game.config.grid.cols;
     }
     draw() {
-        // Horizontal Lines
-        // for (let i = 0; i < 1000; i += ) {
-        //     ctx.beginPath();
-        //     ctx.moveTo(-start.x, i - start.y + offset.y);
-        //     ctx.lineTo(canvasW - start.x - end.x * gap, i - start.y + offset.y);
-        //     ctx.lineWidth = gap / 10;
-        //     ctx.strokeStyle = color;
-        //     ctx.stroke();
-        // }
-        // Vertical Lines
-        // for (let i = 0; i < canvasW - 1 - end.x * gap; i += gap) {
-        //     ctx.beginPath();
-        //     ctx.moveTo(i - start.x + offset.x, -start.y);
-        //     ctx.lineTo(i - start.x + offset.x, canvasH - start.y - end.y * gap);
-        //     ctx.lineWidth = gap / 10;
-        //     ctx.strokeStyle = color;
-        //     ctx.stroke();
-        // }
-        // console.log(this.x);
+        const { rows, cols } = this.game.config.grid;
+        const { width, height } = this.game.ctx.canvas;
+        const color = '#00000020';
+
+        // Rows
+        for (let i = 0.5; i < width; i += width / rows) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, i);
+            this.ctx.lineTo(width, i);
+            this.ctx.stroke();
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeStyle = color;
+            this.ctx.closePath();
+        }
+
+        // Columns
+        for (let i = 0.5; i < height; i += height / cols) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(i, 0);
+            this.ctx.lineTo(i, height);
+            this.ctx.stroke();
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeStyle = color;
+            this.ctx.closePath();
+        }
     }
 }
 export default Grid;

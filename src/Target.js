@@ -10,6 +10,8 @@ class Target {
         this.ctx.beginPath();
         this.ctx.arc(this.pos.x, this.pos.y, 20, 0, 2 * Math.PI);
         this.ctx.stroke();
+        this.ctx.fillStyle = '#3498DB20';
+        this.ctx.fill();
         this.ctx.closePath();
     }
 }
