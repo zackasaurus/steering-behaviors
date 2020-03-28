@@ -11,7 +11,7 @@ class Element {
         // Weights
         this.weights = {
             approach: 3,
-            separate: 5,
+            separate: 8,
             alignment: 3,
             cohesion: 0.5,
         };
@@ -41,8 +41,9 @@ class Element {
             },
 
             speed: 5,
-            force: 0.1,
+            force: 0.05,
             rotation: 0.05, // radians
+            rotationForce: 0.1,
         };
 
         this.inside = 0;
@@ -278,11 +279,11 @@ class Element {
         const desired = new Vector2d();
         desired.add(this.vel);
         desired.add(this.acc);
-        // console.log(this.v);
         const angle = this.vel.angle(desired); // in radians
 
         if (Math.abs(angle) > this.max.rotation) {
-            // console.log('gg');
+            const difference = Math.abs(angle) - this.max.rotation;
+            // console.log(difference);
             // set rotate based off of angle
             if (angle < 0) {
                 this.vel.rotate(-this.max.rotation);
@@ -290,7 +291,7 @@ class Element {
                 this.vel.rotate(this.max.rotation);
             }
 
-            this.vel.normalize(desired.length());
+            this.vel.normalize(desired.length() / (1 + difference));
         } else {
             this.vel.add(this.acc);
         }

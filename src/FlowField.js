@@ -5,6 +5,7 @@ class FlowField {
         this.world = world;
         this.max = false;
         this.data = [];
+        this.direction = [];
     }
     draw() {
         const { ctx } = this.world;
@@ -20,6 +21,16 @@ class FlowField {
                     i * (width / rows),
                     (j + 1) * (height / cols)
                 );
+
+                ctx.beginPath();
+                ctx.lineWidth = '1';
+                ctx.strokeStyle = 'blue';
+                const x = i * (width / rows);
+                const y = (j + 1) * (height / cols);
+                ctx.moveTo(x, y);
+                ctx.lineTo(x + 0, y + 10);
+                ctx.stroke();
+                ctx.closePath();
             }
         }
     }
