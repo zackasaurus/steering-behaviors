@@ -4,11 +4,11 @@ export const Config = {
         height: 700,
     },
     grid: {
-        rows: 25,
-        cols: 25,
+        rows: 30,
+        cols: 30,
     },
     elements: {
-        total: 20,
+        total: 10,
     },
     terrain: {
         granularity: 25,

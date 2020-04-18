@@ -1,3 +1,5 @@
+import Matter from 'matter-js';
+
 import Config from './config';
 
 import Grid from './Grid';
@@ -20,6 +22,12 @@ class Game {
 
         this.canvas.style.visibility = 'visible';
         this.canvas.style.opacity = 1;
+
+        this.engine = Matter.Engine.create();
+
+        this.engine.world.gravity.y = 0;
+
+        Matter.Engine.run(this.engine);
 
         // this.timestamp = {
         //     previous: null,
@@ -51,9 +59,10 @@ class Game {
             };
 
             // Set Boundaries
-            if (pos.x < width && pos.x >= 0 && pos.y < height && pos.y >= 0) {
-                this.target.pos = pos;
-            }
+            // if (pos.x < width && pos.x >= 0 && pos.y < height && pos.y >= 0) {
+            //     this.target.pos = pos;
+            // }
+            this.target.pos = pos;
         });
         // Resize window
         // window.addEventListener('resize', e => {
