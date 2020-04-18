@@ -148,7 +148,7 @@ class Element {
         const sum = new Vector2d();
         let count = 0;
         // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
-        Object.keys(this.world.elements.data).forEach(item => {
+        Object.keys(this.world.elements.data).forEach((item) => {
             const { pos, id } = this.world.elements.data[item];
             // console.log(id);
             let distance = this.pos.distance(pos);
@@ -191,7 +191,7 @@ class Element {
         const sum = new Vector2d();
         let count = 0;
         // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
-        Object.keys(this.world.elements.data).forEach(item => {
+        Object.keys(this.world.elements.data).forEach((item) => {
             const { pos, vel } = this.world.elements.data[item];
 
             let distance = this.pos.distance(pos);
@@ -228,7 +228,7 @@ class Element {
         const sum = new Vector2d();
         let count = 0;
         // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
-        Object.keys(this.world.elements.data).forEach(item => {
+        Object.keys(this.world.elements.data).forEach((item) => {
             const { pos } = this.world.elements.data[item];
 
             let distance = this.pos.distance(pos);

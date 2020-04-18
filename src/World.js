@@ -2,7 +2,7 @@ import Matter from 'matter-js';
 import Element from './Element';
 import Terrain from './Terrain';
 import FlowField from './FlowField';
-import Box from './Box';
+import Box from './box/Box';
 class World {
     constructor(game) {
         this.game = game;
@@ -39,6 +39,7 @@ class World {
             this.boxList.push(
                 new Box(
                     this,
+                    i + 1,
                     Math.random() * this.ctx.canvas.width,
                     Math.random() * this.ctx.canvas.height,
                     20,
@@ -69,6 +70,8 @@ class World {
 
     update() {
         this.boxList.forEach((item) => item.update());
+
+        // this.boxList.forEach((item) => console.log(item.body));
         // this.flowField.update();
         // this.box.update();
         Object.keys(this.elements.data).forEach((item) => {
