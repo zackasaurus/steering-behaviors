@@ -35,7 +35,7 @@ class World {
 
         this.boxList = [];
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.game.config.elements.total; i++) {
             this.boxList.push(
                 new Box(
                     this,

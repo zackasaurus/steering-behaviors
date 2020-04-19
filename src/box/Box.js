@@ -6,8 +6,9 @@ class Box {
         this.game = this.world.game;
         this.ctx = this.world.ctx;
 
-        // body
+        // matter-js
         this.body = Matter.Bodies.rectangle(x, y, w, h);
+        // matter-js config
         this.body.friction = 1;
         this.body.restitution = 0;
         this.body.slop = 0;
@@ -18,11 +19,6 @@ class Box {
         this.h = h;
         this.color = color;
 
-        // this.position = new Vector2d(
-        //     this.body.position.x,
-        //     this.body.position.y
-        // );
-        this.vel = new Vector2d(0, 0);
         this.acc = new Vector2d();
         // Weights
         this.weights = {
@@ -46,14 +42,14 @@ class Box {
                 radius: 50,
             },
             separation: {
-                radius: 100,
+                radius: 50,
             },
             neighbor: {
                 radius: 100,
             },
             approach: {
                 decay: 8000, // ms
-                radius: 100,
+                radius: 200,
             },
 
             speed: 5,
@@ -117,26 +113,24 @@ class Box {
     }
     separate(weight = 1) {
         const sum = new Vector2d();
-        // console.log(this.body.position);
         this.position = new Vector2d();
         this.position.add(this.body.position);
-        // console.log(this.position);
         let count = 0;
         // WIP - needs to use a spatial hash map for detection instead, otherwise it's O(n ** 2) brute force
         this.world.boxList.forEach((item) => {
             // console.log(item);
             // console.log(this.id);
             const { position, id } = item.body;
-            // console.log(position);
-
+            // console.log(id);
+            //
             let distance = this.position.distance(position);
             // console.log(distance);
 
             if (this.id !== id && distance < this.max.separation.radius) {
-                console.log('dd');
+                // console.log('d');
                 const difference = new Vector2d();
                 difference.add(this.position);
-                difference.subtract(this.position);
+                difference.subtract(position);
                 difference.divide(distance);
                 sum.add(difference);
                 count++;
@@ -148,17 +142,7 @@ class Box {
         if (count > 0) {
             sum.divide(count);
             sum.normalize();
-
-            // Approach added
-            // if (distance < this.max.approach.radius) {
-            //     sum.multiply(
-            //         (distance / this.max.approach.radius) ** 2 * this.max.speed
-            //     );
-            // } else {
-            //     sum.multiply(this.max.speed);
-            // }
-
-            sum.subtract(this.vel);
+            sum.subtract(this.body.velocity);
             sum.limit(this.max.force);
         }
         // console.log(sum);
@@ -179,8 +163,8 @@ class Box {
         // Reset acceleration
         this.acc.multiply(0);
 
-        this.applyForce(this.approach(0.02));
-        this.applyForce(this.separate(0.2));
+        this.applyForce(this.approach(0.2));
+        // this.applyForce(this.separate(0.2));
         // console.log(this.acc);
         // console.log(this.acc);
         this.body.force = this.acc;
@@ -205,24 +189,6 @@ class Box {
         } else {
             Matter.Body.setAngularVelocity(this.body, steer);
         }
-        // console.log(this.body.angle);
-        // Matter.Body.update(this.body, 1 / 60);
-
-        // this.vel.add(this.acc);
-        // this.body.setAngularVelocity = 5;
-
-        // Matter.Body.setAngularVelocity(this.body, 0.01);
-        // this.body.angularSpeed = 1;
-        // this.body.angle = 0;
-
-        // this.body.torque = this.acc;
-
-        // console.log(this.body.angularVelocity);
-        // Matter.Body.create({
-        //     force: this.acc,
-        // });
-        // Matter.Body.set(this.body, )
-        // Matter.Body.setVelocity(this.body, this.vel);
     }
 }
 export default Box;
